@@ -33,6 +33,14 @@ led = digitalio.DigitalInOut(board.IO11)
 led.direction = digitalio.Direction.OUTPUT
 
 ecran = projet2.ecran()
-
+timerArrosage = 0
 while True:
-    pump.value = button.value
+
+    if(button.value == True and pump.value == False):
+        print(pump.value)
+        pump.value = True
+        timerArrosage = time.monotonic()
+    
+    if(time.monotonic()-timerArrosage >30):
+        print(button.value)
+        pump.value = False
