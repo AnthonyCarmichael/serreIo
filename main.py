@@ -23,8 +23,7 @@ ecran = projet2.ecran()
 pwm = pwmio.PWMOut(board.IO14)  
 self = Servo(pwm)
 self.value = True #True = fermé
-self.angle = 149
-#self.angle = 0
+self.angle = 0
 
 # Init pump
 pump = digitalio.DigitalInOut(board.IO13)
@@ -75,24 +74,18 @@ while True:
             total += humidite
 
         hum_moyenne = total/len(tableauHum)
-        #print(hum_moyenne)
+        print(hum_moyenne)
 
     #Activation de la pompe avec le bouton 
-    if(button.value == True and pump.value == False):
-        print(pump.value)
+    if(button.value == True and pump.value == False and sensorEau.value == True):
+        #print(pump.value)
         pump.value = True
         timerArrosage = time.monotonic()
     
-    #La pompe arrose pendant 30 secondes
-    if(time.monotonic()-timerArrosage >30 and timerArrosage != 0):
-        pump.value = False
-        intervalleArrosage = time.monotonic()
-        timerArrosage = 0
-        # Section sensor niveau d'eau
-        
+    
 
-    #Vérification de l'umidité 30 minutes après l'arrosage
-    if(time.monotonic() - intervalleArrosage > 1800 and intervalleArrosage != 0 and sensorEau == True):
+    #Vérification de l'humidité 30 minutes après l'arrosage
+    if(time.monotonic() - intervalleArrosage > 1800 and intervalleArrosage != 0 and sensorEau.value == True):
         #Activation de la pompe avec l'humidité de la terre
         if(hum_moyenne >= 50000):
             pump.value = True
@@ -102,14 +95,29 @@ while True:
         # 17100 devrrait être arrosé
         # 16800 assez arrosé
         
-    print(bmp280.temperature)
-    if(bmp280.temperature <10):
+       
+    
+    #La pompe arrose pendant 30 secondes
+    if(time.monotonic()-timerArrosage >30 and timerArrosage != 0):
+        pump.value = False
+        intervalleArrosage = time.monotonic()
+        timerArrosage = 0
+        # Section sensor niveau d'eau
+         
+    # Section traitement du heater        
+    #print(bmp280.temperature)
+    if(dht.temperature <10):
         heater.value = True
     else:
         heater.value = False
-        
     
+    #print(dht.humidity) 
     
+    if(dht.temperature >30 or dht.humidity >75):
+        # ouvre la trap d'aération
+        self.angle = 149
+        # lance la fan
+
     
 
 
