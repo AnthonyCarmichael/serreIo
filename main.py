@@ -2,12 +2,22 @@ import board
 import digitalio
 import analogio
 import time
-#import adafruit_bmp280
+import adafruit_bmp280
 import adafruit_dht
 import projet2
 import wifi
 from adafruit_motor.servo import Servo
 import pwmio
+
+
+# Mise en place des objets de la carte Arduino
+i2c = board.I2C()
+dht = adafruit_dht.DHT11(board.IO8)
+dht2 = analogio.AnalogIn(board.A1)
+led = digitalio.DigitalInOut(board.IO11)
+led.direction = digitalio.Direction.OUTPUT
+
+ecran = projet2.ecran()
 
 # Init servo
 pwm = pwmio.PWMOut(board.IO14)  
@@ -17,7 +27,6 @@ self.angle = 149
 #self.angle = 0
 
 # Init pump
-
 pump = digitalio.DigitalInOut(board.IO13)
 pump.switch_to_output(False)
 
@@ -25,14 +34,18 @@ pump.switch_to_output(False)
 button = digitalio.DigitalInOut(board.IO9)
 button.direction = digitalio.Direction.INPUT
 
-# Mise en place des objets de la carte Arduino
-i2c = board.I2C()
-dht = adafruit_dht.DHT11(board.IO8)
-dht2 = analogio.AnalogIn(board.A0)
-led = digitalio.DigitalInOut(board.IO11)
-led.direction = digitalio.Direction.OUTPUT
+# Init sensor eau
+sensorEau = digitalio.DigitalInOut(board.IO12)
+sensorEau.direction = digitalio.Direction.INPUT
 
-ecran = projet2.ecran()
+# Init heater
+heater = digitalio.DigitalInOut(board.IO10)
+heater.switch_to_output(False)
+
+# Init capteur température ambiante
+bmp280 = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
+bmp280.sea_level_pressure = 1016.10
+
 timerArrosage = 0
 intervalleArrosage = time.monotonic() - 1800
 last_time_recolte = 0
@@ -42,9 +55,13 @@ hum_moyenne = 0
 
 
 while True:
-
+    # Led allume si il n'y a pu d'eau dans le réservoir
+    led.value = not sensorEau.value
+    
     # Gestion de la moyenne de l'humidité de la terre
-    if(time.monotonic() - last_time_recolte > 1):
+    if(time.monotonic() - last_time_recolte > 1 ):
+        #print(dht2.value)
+        #print(sensorEau.value)
 
         last_time_recolte = time.monotonic()
         humidite = dht2.value
@@ -58,7 +75,7 @@ while True:
             total += humidite
 
         hum_moyenne = total/len(tableauHum)
-        print(hum_moyenne)
+        #print(hum_moyenne)
 
     #Activation de la pompe avec le bouton 
     if(button.value == True and pump.value == False):
@@ -71,16 +88,30 @@ while True:
         pump.value = False
         intervalleArrosage = time.monotonic()
         timerArrosage = 0
+        # Section sensor niveau d'eau
+        
 
     #Vérification de l'umidité 30 minutes après l'arrosage
-    if(time.monotonic() - intervalleArrosage > 1800 and intervalleArrosage != 0):
+    if(time.monotonic() - intervalleArrosage > 1800 and intervalleArrosage != 0 and sensorEau == True):
         #Activation de la pompe avec l'humidité de la terre
-        if(hum_moyenne >= 17000):
+        if(hum_moyenne >= 50000):
             pump.value = True
             timerArrosage = time.monotonic()
             intervalleArrosage = 0
     
-        # 17098 devrrait être arrosé
+        # 17100 devrrait être arrosé
         # 16800 assez arrosé
+        
+    print(bmp280.temperature)
+    if(bmp280.temperature <10):
+        heater.value = True
+    else:
+        heater.value = False
+        
+    
+    
+    
+
+
 
     
