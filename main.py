@@ -56,6 +56,11 @@ tableauHum = []
 total = 0
 hum_moyenne = 0
 
+# Gestion linéaire d'arrosage
+dureeArrosageMin = 10
+dureeArrosageMax = 60
+tempReelArrosage =0
+
 
 while True:
     # Led allume si il n'y a pu d'eau dans le réservoir
@@ -65,7 +70,7 @@ while True:
     if(time.monotonic() - last_time_recolte > 1 ):
         #print(dht2.value)
         #print(sensorEau.value)
-        print(dht.temperature)
+        #print(dht.temperature)
 
         last_time_recolte = time.monotonic()
         humidite = dht2.value
@@ -92,18 +97,28 @@ while True:
     #Vérification de l'humidité 30 minutes après l'arrosage
     if(time.monotonic() - intervalleArrosage > 1800 and intervalleArrosage != 0 and sensorEau.value == True):
         #Activation de la pompe avec l'humidité de la terre
-        if(hum_moyenne >= 50000):
+        if(hum_moyenne > 50000):
+            # Gestion linéaire d'arrosage
+            percent =(51216 - 50000)* 100/1216 
+            
+            
+            tempReelArrosage= dureeArrosageMax*percent/100
+            
+            if tempReelArrosage < dureeArrosageMin:
+                tempReelArrosage = dureeArrosageMin
+            
+            # Arrosage
             pump.value = True
             timerArrosage = time.monotonic()
             intervalleArrosage = 0
+            print(tempReelArrosage)
     
         # 17100 devrrait être arrosé
         # 16800 assez arrosé
         
        
-    
     #La pompe arrose pendant 30 secondes
-    if(time.monotonic()-timerArrosage >30 and timerArrosage != 0):
+    if(time.monotonic()-timerArrosage >tempReelArrosage and timerArrosage != 0):
         pump.value = False
         intervalleArrosage = time.monotonic()
         timerArrosage = 0
