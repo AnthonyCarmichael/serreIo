@@ -45,6 +45,10 @@ heater.switch_to_output(False)
 bmp280 = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
 bmp280.sea_level_pressure = 1016.10
 
+# Init Fan
+fan= digitalio.DigitalInOut(board.IO7)
+fan.switch_to_output(False)
+
 timerArrosage = 0
 intervalleArrosage = time.monotonic() - 1800
 last_time_recolte = 0
@@ -61,6 +65,7 @@ while True:
     if(time.monotonic() - last_time_recolte > 1 ):
         #print(dht2.value)
         #print(sensorEau.value)
+        print(dht.temperature)
 
         last_time_recolte = time.monotonic()
         humidite = dht2.value
@@ -105,7 +110,7 @@ while True:
         # Section sensor niveau d'eau
          
     # Section traitement du heater        
-    #print(bmp280.temperature)
+    
     if(dht.temperature <10):
         heater.value = True
     else:
@@ -113,11 +118,17 @@ while True:
     
     #print(dht.humidity) 
     
-    if(dht.temperature >30 or dht.humidity >75):
+    if((dht.temperature >30 or dht.humidity >75) and fan.value == False):
         # ouvre la trap d'aération
         self.angle = 149
         # lance la fan
-
+        fan.value = True
+        print('Fan : True')
+    elif ((dht.temperature <25 and dht.humidity <60) and fan.value == True) :
+        self.angle = 0
+        fan.value = False
+            
+        
     
 
 
