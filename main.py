@@ -99,8 +99,7 @@ while True:
         #Activation de la pompe avec l'humidité de la terre
         if(hum_moyenne > 50000):
             # Gestion linéaire d'arrosage
-            percent =(51216 - 50000)* 100/1216 
-            
+            percent =(dht2.value - 50000)* 100/1216 
             
             tempReelArrosage= dureeArrosageMax*percent/100
             
