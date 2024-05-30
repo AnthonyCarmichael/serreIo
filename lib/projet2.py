@@ -102,7 +102,7 @@ def connecter_mqtt():
                     #port=8883)
     
     # Configuration du client MQTT Local avec mosquitto
-    mqtt_broker = "10.170.14.202"
+    mqtt_broker = "172.16.5.116"
     
     # Configuration du client MQTT
     

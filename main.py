@@ -49,6 +49,7 @@ bmp280.sea_level_pressure = 1016.10
 fan= digitalio.DigitalInOut(board.IO7)
 fan.switch_to_output(False)
 
+timerReconnexion = time.monotonic()-300
 timerArrosage = 0
 intervalleArrosage = time.monotonic() - 1800
 last_time_recolte = 0
@@ -60,6 +61,8 @@ hum_moyenne = 0
 dureeArrosageMin = 10
 dureeArrosageMax = 60
 tempReelArrosage =0
+
+io = projet2.connecter_mqtt()
 
 
 while True:
