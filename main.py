@@ -88,9 +88,18 @@ while True:
 
     #Activation de la pompe avec le bouton 
     if(button.value == True and pump.value == False and sensorEau.value == True):
-        #print(pump.value)
+        percent =(dht2.value - 50000)* 100/1216 
+    
+        tempReelArrosage= dureeArrosageMax*percent/100
+        
+        if tempReelArrosage < dureeArrosageMin:
+            tempReelArrosage = dureeArrosageMin
+        
+        # Arrosage
         pump.value = True
         timerArrosage = time.monotonic()
+        intervalleArrosage = 0
+        print(tempReelArrosage)
     
     
 
