@@ -108,7 +108,7 @@ settingArroMin = 10
 settingArroMax = 60
 settingHumAirMax = 75
 
-settingAuto = False
+settingAuto = True
 
 
 # Init servo
